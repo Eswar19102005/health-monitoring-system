@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Tracking App with AI Chatbot</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Existing styles here */
+    </style>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 800px;
+        }
+
+        .navbar {
+            width: 100%;
+            background-color: #28a745;
+            display: flex;
+            justify-content: space-between;
+            padding: 2px 5px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 999;
+        }
+
+        .navbar img {
+            height: 50px;
+            width: auto;
+        }
+
+        .navbar .title {
+            color: white;
+            font-size: 24px;
+            margin-left: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar .menu {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .navbar .menu div {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .navbar .menu .icon {
+            font-size: 24px;
+            color: white;
+            transition: transform 0.3s;
+        }
+
+        .navbar .menu .icon:hover {
+            transform: scale(1.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 40px;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 80%;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            padding: 15px 30px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        canvas {
+            margin-top: 30px;
+        }
+
+      /* Profile Page Styling */
+#profile h1 {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.profile-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.profile-form label {
+    font-weight: bold;
+    text-align: left;
+    width: 80%;
+    margin-bottom: 8px;
+}
+
+.profile-form input,
+.profile-form textarea {
+    width: 80%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.profile-form button {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.profile-form button:hover {
+    background-color: #218838;
+}
+
+
+        .blog-post {
+            margin-bottom: 30px;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .blog-post h3 {
+            color: #28a745;
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        .blog-post p {
+            font-size: 16px;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .blog-image {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .navbar .title {
+                font-size: 18px;
+            }
+
+            input,
+            textarea,
+            select {
+                width: 90%;
+            }
+        }
+
+        /* Chatbot Styles */
+        .chatbot-container {
+            position: fixed;
+            bottom: 8px;
+            right: 8px;
+            width: 300px;
+            max-width: 80%;
+            background-color: #fff;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        .chatbot-header {
+            background-color: #28a745;
+            padding: 10px;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .chatbot-messages {
+            height: 250px;
+            overflow-y: auto;
+            padding: 8px;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chatbot-input {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            background-color: white;
+        }
+
+        .chatbot-input input {
+            flex-grow: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 8px;
+            margin-right: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .chatbot-input button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 10px;
+            cursor: pointer;
+        }
+
+        .chatbot-input button:hover {
+            background-color: #218838;
+        }
+
+        .user-message,
+        .bot-message {
+            margin: 8px 0;
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .user-message {
+            background-color: #d1ffd6;
+            align-self: flex-end;
+        }
+
+        .bot-message {
+            background-color: #f1f1f1;
+            align-self: flex-start;
+        }
+
+             /* About Us Section */
+        #aboutus {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .about-us-details {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .about-us-details a {
+            color: #28a745;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .about-us-details a:hover {
+            text-decoration: underline;
+        }
+
+    </style>
+</head>
+
+<body>
+    <!-- Authentication Section -->
+    <div class="container" id="auth-section">
+        <h1>Sign Up / Sign In</h1>
+        <div>
+            <input type="text" id="email" placeholder="Email">
+        </div>
+        <div>
+            <input type="password" id="password" placeholder="Password">
+        </div>
+        <button onclick="signUp()">Sign Up</button>
+        <button onclick="signIn()">Sign In</button>
+        <p id="error-message" style="color: red; display: none;">Invalid credentials!</p>
+    </div>
+
+    <!-- App Section -->
+    <div class="container hidden" id="app-section">
+        <div class="navbar">
+            <div class="logo">
+                <img src=" c:\Users\BHARATH RAJA\Downloads\health.png" alt="Health Monitoring logo">
+            </div>
+            <div class="title">Health Monitoring</div>
+            <div class="menu">
+                <div onclick="showPage('home')" title="Home">
+                    <span class="icon icon-home">🏠</span>
+                    <span>Home</span>
+                </div>
+                <div onclick="showPage('profile')" title="Profile">
+                    <span class="icon icon-profile">👤</span>
+                    <span>Profile</span>
+                </div>
+                <div onclick="showPage('blog')" title="Blog">
+                    <span class="icon icon-blog">📚</span>
+                    <span>Blog</span>
+                </div>
+                <div onclick="showPage('aboutus')" title="About Us">
+                    <span class="icon icon-about-us">📄</span>
+                    <span>About Us</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Home Section -->
+        <div id="home" class="page">
+            <h1>Welcome to Health Monitoring App</h1>
+            <p>Track your health, manage your fitness goals, and stay informed with our healthcare blog.</p>
+            <!-- Health Tracking -->
+            <h2>Track Your Health</h2>
+            <div>
+                <label>Steps:</label>
+                <input type="number" id="steps" placeholder="Steps" min="0">
+            </div>
+            <div>
+                <label>Calories Burnt:</label>
+                <input type="number" id="calories" placeholder="Calories" min="0">
+            </div>
+            <div>
+                <label>Heart Rate (BPM):</label>
+                <input type="number" id="heart-rate" placeholder="Heart Rate" min="0">
+            </div>
+            <div>
+                <label>Sleep Duration (hours):</label>
+                <input type="number" id="sleep" placeholder="Sleep" min="0" step="0.1">
+            </div>
+            <div>
+                <label>Water Intake (liters):</label>
+                <input type="number" id="water-intake" placeholder="Water Intake" min="0" step="0.1">
+            </div>
+
+            <button onclick="saveData()">Save Data</button>
+            <canvas id="healthChart"></canvas>
+        </div>
+
+  <!-- Profile Section -->
+<div id="profile" class="page hidden">
+    <h1>Your Profile</h1>
+    <form class="profile-form">
+        <label for="profile-name">Name:</label>
+        <input type="text" id="profile-name" placeholder="Enter your name">
+
+        <label for="profile-dob">Date of Birth:</label>
+        <input type="date" id="profile-dob">
+
+        <label for="profile-email">Email:</label>
+        <input type="email" id="profile-email" placeholder="Enter your email">
+
+        <label for="profile-description">Description:</label>
+        <textarea id="profile-description" rows="4" placeholder="Tell us about yourself"></textarea>
+
+        <button type="button" onclick="saveProfile()">Save Profile</button>
+    </form>
+</div>
+
+
+
+        <!-- Blog Section -->
+        <div id="blog" class="page hidden">
+            <h1>Healthcare Blog</h1>
+            <div class="blog-post">
+                <h3>Post steps </h3>
+                <img class="sleep2.png" src="c:\Users\BHARATH RAJA\Downloads\steps.png" alt="Blog Image 1">
+                <p>Walking is one of the simplest and most effective exercises. Taking 10,000 steps a day has been shown to boost cardiovascular health, aid weight loss, and improve mental well-being. Using pedometers or fitness apps can motivate you to meet your daily step goal.
+</p>
+            </div>
+            <div class="blog-post">
+                <h3>Post calorie burnt</h3>
+               <img class="calorie2.png" src=" c:\Users\BHARATH RAJA\Downloads\calories.png" alt="Blog Image 2">
+                <p>Calories are the units of energy we derive from food and drink. Managing calorie intake is essential for maintaining a healthy weight. A calorie deficit can aid in weight loss, while a surplus may lead to weight gain. Tools like calorie trackers and apps can help you stay on track.
+</p>
+            </div>
+            <div class="blog-post">
+                <h3>Post heart rate(BPM)</h3>
+                <img class="heart rate2.png" src=" c:\Users\BHARATH RAJA\Downloads\heart rate.png" alt="Blog Image 3">
+                <p>Your heart rate reflects your overall health and fitness level. Monitoring your resting and active heart rate can help identify potential health issues. Fitness trackers and heart rate monitors make it easier than ever to stay informed.
+
+</p>
+            </div>
+            <div class="blog-post">
+                <h3>Post sleep duration(hours)</h3>
+                <img class="sleep3.png" src="c:\Users\BHARATH RAJA\Downloads\sleep.png " alt="Blog Image 4">
+                <p>Sleep is the cornerstone of physical and mental recovery. Poor sleep affects your mood, energy levels, and long-term health. Aim for 7-9 hours of sleep per night and establish a regular sleep schedule.
+</p>
+            </div>
+            <div class="blog-post">
+                <h3>Post water intake(litres)</h3>
+                <img class="water intake2.png" src=" c:\Users\BHARATH RAJA\Downloads\waterintake.png" alt="Blog Image 5">
+                <p>Water is vital for nearly every function in your body. Staying hydrated helps maintain energy levels, supports digestion, and improves skin health. The daily recommendation is 8-10 glasses, but individual needs vary.</p>
+            </div>
+
+        </div>
+
+          <!-- About Us Section -->
+        <div id="aboutus" class="page hidden">
+            <h1>About Us</h1>
+            <p>
+                Welcome to the Health Monitoring App! Our mission is to empower users to monitor and manage their health effectively.
+                We are committed to providing personalized tools, up-to-date health resources, and expert guidance to help you achieve your wellness goals.
+            </p>
+            <div class="about-us-details">
+                <p>Contact us for any inquiries:</p>
+                <p><strong>Address:</strong> 1234 Wellness Street, Healthy City, HC 56789</p>
+                <p><strong>Phone:</strong> +1 (123) 456-7890</p>
+                <p><strong>Email:</strong> support@healthmonitoringapp.com</p>
+                <p><strong>Website:</strong> <a href="https://www.healthmonitoringapp.com" target="_blank">www.healthmonitoringapp.com</a></p>
+            </div>
+        </div>
+
+
+    <!-- Chatbot Section -->
+    <div class="chatbot-container hidden" id="chatbot-container">
+        <div class="chatbot-header" onclick="toggleChatbot()">AI Health Assistant</div>
+        <div class="chatbot-messages" id="chatbot-messages">
+            <!-- Messages will appear here -->
+        </div>
+        <div class="chatbot-input">
+            <input type="text" id="chatbot-input" placeholder="Ask me a health question...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+ <!-- Your existing HTML structure here -->
+
+    <div class="container hidden" id="app-section">
+        <!-- Other sections -->
+        <div id="home" class="page">
+            <h1>Welcome to Health Monitoring App</h1>
+            <p>Track your health, manage your fitness goals, and stay informed with our healthcare blog.</p>
+
+            <!-- Health Tracking -->
+            <h2>Track Your Health</h2>
+            <div>
+                <label>Steps:</label>
+                <input type="number" id="steps" placeholder="Steps" min="0">
+            </div>
+            <div>
+                <label>Calories Burnt:</label>
+                <input type="number" id="calories" placeholder="Calories" min="0">
+            </div>
+            <div>
+                <label>Heart Rate (BPM):</label>
+                <input type="number" id="heart-rate" placeholder="Heart Rate" min="0">
+            </div>
+            <div>
+                <label>Sleep Duration (hours):</label>
+                <input type="number" id="sleep" placeholder="Sleep" min="0" step="0.1">
+            </div>
+            <button onclick="saveData()">Save Data</button>
+
+            <!-- Bar Chart -->
+            <canvas id="healthChart" width="400" height="200" class="hidden"></canvas>
+        </div>
+    </div>
+
+
+
+
+    <script>
+        // Authentication Logic
+        function signUp() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            if (email && password) {
+                document.getElementById('auth-section').classList.add('hidden');
+                document.getElementById('app-section').classList.remove('hidden');
+            } else {
+                alert("Please enter valid credentials.");
+            }
+        }
+
+        function signIn() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            if (email && password) {
+                document.getElementById('auth-section').classList.add('hidden');
+                document.getElementById('app-section').classList.remove('hidden');
+            } else {
+                alert("Invalid email or password.");
+            }
+        }
+
+        // Navigation Logic
+        function showPage(pageId) {
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => {
+                page.classList.add('hidden');
+            });
+            document.getElementById(pageId).classList.remove('hidden');
+        }
+
+        // Profile Logic
+        function saveProfile() {
+            const name = document.getElementById('profile-name').value;
+            const dob = document.getElementById('profile-dob').value;
+            const email = document.getElementById('profile-email').value;
+            const description = document.getElementById('profile-description').value;
+            console.log({ name, dob, email, description });
+            alert("Profile saved successfully!");
+        }
+
+
+        // Chatbot Logic
+        function toggleChatbot() {
+            const chatbotContainer = document.getElementById('chatbot-container');
+            chatbotContainer.classList.toggle('hidden');
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatbot-input').value;
+            if (input.trim()) {
+                addMessage(input, 'user');
+                setTimeout(() => {
+                    const response = getChatbotResponse(input);
+                    addMessage(response, 'bot');
+                }, 1000);
+                document.getElementById('chatbot-input').value = '';
+            }
+        }
+
+        function addMessage(text, sender) {
+            const messagesContainer = document.getElementById('chatbot-messages');
+            const messageElement = document.createElement('div');
+            messageElement.classList.add(sender === 'user' ? 'user-message' : 'bot-message');
+            messageElement.textContent = text;
+            messagesContainer.appendChild(messageElement);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function getChatbotResponse(input) {
+            // Simplified AI response logic
+            if (input.toLowerCase().includes("heart rate")) {
+                return "A normal resting heart rate for adults ranges from 60 to 100 beats per minute.";
+            } else if (input.toLowerCase().includes("calories")) {
+                return "The average person needs about 2000-2500 calories per day, but this varies depending on activity level and other factors.";
+            } else if (input.toLowerCase().includes("sleep")) {
+                return "The amount of sleep a person needs depends on many things, including their age. In general: Infants (ages 0-3 months) need 14-17 hours a day.Infants (ages 4-11 months) need 12-15 hours a day. Toddlers (ages 1-2 years) need about 11-14 hours a day. Preschool children (ages 3-5) need 10-13 hours a day. School-age children (ages 6-13) need 9-11 hours a day.Teenagers (ages 14-17) need about 8-10 hours each day. Most adults need 7 to 9 hours, although some people may need as few as 6 hours or as many as 10 hours of sleep each day.Older adults (ages 65 and older) need 7-8 hours of sleep each day. Women in the first 3 months of pregnancy often need several more hours of sleep than usual.";
+            } else if (input.toLowerCase().includes("steps")) {
+                return " The average number of steps a person takes per day depends on several factors, including age, sex, and activity level: Adults: Adults typically take between 4,000 and 18,000 steps per day. A 2011 study found that adult men took about 5,340 steps per day, while adult women took about 4,912 steps per day. Children: Children under 18 typically take between 10,000 and 16,000 steps per day. Young male children take between 12,000 and 16,000 steps per day, while young female children take between 10,000 and 13,000 steps per day. Activity level: The average person takes between 3,000 and 6,000 steps per day from commuting and shopping. Adding 30 minutes of exercise, which is about 3,000 steps, can bring the total to around 10,000 steps. Goals:  The number of steps you aim for depends on your goals. For example, if you want to lose weight or reduce your risk of metabolic syndrome, you might consider increasing your daily step average. The current recommendation for reducing the risk of disease and maintaining a healthy lifestyle is closer to 7,500-10,000 steps.";
+            } else if (input.toLowerCase().includes("waterintake")) {
+                return "The amount of water a person should drink each day depends on several factors, including age, sex, and activity level. Here are some guidelines for water intake by age and sex: Infants O-6 months: 0.7 liters, Children ages 4-8: 1.7 liters, Boys ages 9-13: 2.4 liters, Girls ages 9-13: 2.1 liters, Adolescents ages 14-18: Boys 3.3 liters, girls 2.2 liters, Adults ages 19-70: Men 3.7 liters, women 2.7 liters, Pregnant women: 3 liters, Breastfeeding women: 12 cups of water daily.";
+           } else if (input.toLowerCase().includes("waterintake")) {
+                return "The amount of water a person should drink each day depends on several factors, including age, sex, and activity level. Here are some guidelines for water intake by age and sex: Infants O-6 months: 0.7 liters, Children ages 4-8: 1.7 liters, Boys ages 9-13: 2.4 liters, Girls ages 9-13: 2.1 liters, Adolescents ages 14-18: Boys 3.3 liters, girls 2.2 liters, Adults ages 19-70: Men 3.7 liters, women 2.7 liters, Pregnant women: 3 liters, Breastfeeding women: 12 cups of water daily.";
+
+            } else {
+                return "I'm here to help with health-related queries. Try asking about heart rate, calories, or sleep , steps , waterintake ";
+            }
+        }
+
+          let healthChart;
+
+        // Health Data Tracking
+function saveData() {
+    const steps = parseInt(document.getElementById('steps').value) || 0;
+    const calories = parseInt(document.getElementById('calories').value) || 0;
+    const heartRate = parseInt(document.getElementById('heart-rate').value) || 0;
+    const sleep = parseFloat(document.getElementById('sleep').value) || 0;
+    const waterIntake = parseFloat(document.getElementById('water-intake').value) || 0;
+
+    const healthData = { steps, calories, heartRate, sleep, waterIntake };
+    console.log("Health Data:", healthData);
+    alert("Your health data has been saved!");
+
+    // Render the chart
+    renderChart(healthData);
+}
+
+function renderChart(data) {
+    const ctx = document.getElementById('healthChart').getContext('2d');
+    document.getElementById('healthChart').classList.remove('hidden');
+
+    // Destroy the existing chart instance if it exists
+    if (healthChart) {
+        healthChart.destroy();
+    }
+
+    // Create a new bar chart
+    healthChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Steps', 'Calories', 'Heart Rate', 'Sleep (hrs)', 'Water Intake (liters)'],
+            datasets: [{
+                label: 'Health Metrics',
+                data: [data.steps, data.calories, data.heartRate, data.sleep, data.waterIntake],
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(153, 102, 255, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(153, 102, 255, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+
+    </script>
+</body>
+
+</html>
+
+
+
+
